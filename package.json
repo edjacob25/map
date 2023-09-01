@@ -1,0 +1,20 @@
+{
+  "name": "map-jp",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "wrangler": "^3.6.0"
+  },
+  "dependencies": {
+    "@types/leaflet": "^1.9.3",
+    "leaflet": "^1.9.4"
+  }
+}
