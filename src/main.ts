@@ -13,7 +13,6 @@ async function setMap(apikey: string) {
     document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <h1>Loading</h1>
     `
-    console.log(apikey);
 
     let resp = await fetch("/api/points", {
         headers: {
@@ -36,7 +35,7 @@ async function setMap(apikey: string) {
       <div id="map"></div>
     `
 
-    let coords: { lat: number, lon: number, dt: string; }[] = await resp.json();
+    let coords: { lat: number, lon: number, date: string; }[] = await resp.json();
     let initial: [number, number] = [coords[0].lat, coords[0].lon];
     let my_map = L.map("map", {preferCanvas: true}).setView(initial, 10)
 
@@ -70,7 +69,7 @@ async function setMap(apikey: string) {
     ]
 
     for (let cord of coords) {
-        let dt = DateTime.fromISO(cord.dt).setZone("Asia/Tokyo");
+        let dt = DateTime.fromISO(cord.date).setZone("Asia/Tokyo");
         options.color = colors[dt.day % 12];
         options.fillColor = colors[dt.day % 12]
         L.circle([cord.lat, cord.lon], options).addTo(group);
@@ -86,10 +85,11 @@ async function setMap(apikey: string) {
                 APIKEY: apikey
             }
         });
-        let coords: { lat: number, lon: number, dt: string; }[] = await resp.json();
+        let coords: { lat: number, lon: number, date: string; }[] = await resp.json();
 
         for (const newCod of coords) {
-            let dt = DateTime.fromISO(newCod.dt).setZone("Asia/Tokyo");
+
+            let dt = DateTime.fromISO(newCod.date).setZone("Asia/Tokyo");
             options.color = colors[dt.day % 12];
             options.fillColor = colors[dt.day % 12]
             L.circle([newCod.lat, newCod.lon], options).addTo(group);
@@ -103,7 +103,7 @@ async function setMap(apikey: string) {
             }
         });
         let day = parseInt((e.target as HTMLInputElement).value.split("-")[2]);
-        let coords: { lat: number, lon: number, dt: DateTime; }[] = await resp.json();
+        let coords: { lat: number, lon: number, date: string; }[] = await resp.json();
         options.color = colors[day % 12];
         options.fillColor = colors[day % 12];
         for (const newCod of coords) {
