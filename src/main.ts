@@ -5,8 +5,10 @@ import L, {CircleMarker, layerGroup} from 'leaflet';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <h1>Enter the api key</h1>
-  <input id="apiKey" type="password" />
-  <input id="apiSend" type="button" value="Submit" /> 
+  <form id="api">
+    <input id="apiKey" type="password" />
+    <input id="apiSend" type="submit" value="Submit" />
+  </form>
 `
 
 async function setMap(apikey: string) {
@@ -114,9 +116,9 @@ async function setMap(apikey: string) {
 }
 
 
-document.querySelector<HTMLDivElement>('#apiSend')?.addEventListener('click', () => {
+document.querySelector<HTMLDivElement>('#api')?.addEventListener('submit', async () => {
     let value = document.querySelector<HTMLInputElement>('#apiKey')?.value || "";
-    setMap(value);
+    await setMap(value);
 });
 
 
