@@ -16,7 +16,7 @@ async function setMap(apikey: string) {
     <h1>Loading</h1>
   `;
 
-  let resp = await fetch("/api/points", {
+  let resp = await fetch("/api/health", {
     headers: {
       APIKEY: apikey,
     },
