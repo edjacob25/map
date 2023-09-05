@@ -1,7 +1,7 @@
 import "./style.css";
 import "leaflet/dist/leaflet.css";
 import { DateTime } from "luxon";
-import L, { CircleMarker, layerGroup } from "leaflet";
+import L, { layerGroup } from "leaflet";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <h1>Enter the api key</h1>
@@ -72,10 +72,15 @@ async function setMap(apikey: string) {
     let coords: { lat: number; lon: number; date: string }[] = await resp.json();
     options.color = getColor(day);
     options.fillColor = getColor(day);
+    let box = {bX: Number.NEGATIVE_INFINITY , sX: Number.POSITIVE_INFINITY, bY: Number.NEGATIVE_INFINITY , sY: Number.POSITIVE_INFINITY};
     for (const newCod of coords) {
+      box.bY = newCod.lat > box.bY ? newCod.lat: box.bY;
+      box.sY = newCod.lat < box.sY ? newCod.lat: box.sY;
+      box.bX = newCod.lon > box.bX ? newCod.lon: box.bX;
+      box.sX = newCod.lon < box.sX ? newCod.lon: box.sX;
       L.circle([newCod.lat, newCod.lon], options).addTo(group);
     }
-    my_map.setView((group.getLayers()[0] as CircleMarker)?.getLatLng(), 13);
+    my_map.fitBounds([[box.sY, box.sX],[box.bY, box.bX]]);
   });
 }
 
