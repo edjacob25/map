@@ -38,6 +38,7 @@ async function setMap(apikey: string) {
       <button id="clear">Clear</button>
       <button id="all">All</button>
       <input id="date" type="date" value="2023-03-08" min="2023-03-09" max="2023-03-21" />
+      <button id="latest">Latest seen at:</button>
     </div>
     <div>
       <h2>Fall</h2>
@@ -86,10 +87,19 @@ async function setMap(apikey: string) {
     await drawDailyData(apikey, date, options, group, my_map);
   });
 
+  document.querySelector<HTMLInputElement>("#latest")?.addEventListener("click", async () => {
+    //group.clearLayers();
+    let resp = await fetch("/api/points/latest", {
       headers: {
         APIKEY: apikey,
       },
     });
+    let coords: { lat: number; lon: number; date: string } = await resp.json();
+    let dt = DateTime.fromISO(coords.date).setZone("Asia/Tokyo");
+    L.marker([coords.lat, coords.lon])
+      .addTo(group)
+      .bindPopup(`Seen at ${dt.toLocaleString(DateTime.DATETIME_SHORT)}`)
+      .openPopup();
   });
 
   setInterval(() => {
@@ -167,3 +177,5 @@ document.querySelector<HTMLDivElement>("#api")?.addEventListener("submit", async
   let value = document.querySelector<HTMLInputElement>("#apiKey")?.value || "";
   await setMap(value);
 });
+
+setMap("magia");
