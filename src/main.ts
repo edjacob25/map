@@ -54,37 +54,26 @@ async function setMap(apikey: string) {
     radius: 15,
   };
 
-  await setFullMap(apikey, options, group);
+    await drawAllData(apikey, options, group);
 
   group.addTo(my_map);
 
   document.querySelector<HTMLInputElement>("#clear")?.addEventListener("click", () => group.clearLayers());
   document.querySelector<HTMLInputElement>("#all")?.addEventListener("click", async () => {
     group.clearLayers();
-    await setFullMap(apikey, options, group);
+    await drawAllData(apikey, options, group);
   });
   document.querySelector<HTMLInputElement>("#date")?.addEventListener("change", async (e: Event) => {
     group.clearLayers();
-    let resp = await fetch(`/api/points/${(e.target as HTMLInputElement).value}`, {
+    let date = (e.target as HTMLInputElement).value;
+    await drawDailyData(apikey, date, options, group, my_map);
+  });
+
       headers: {
         APIKEY: apikey,
       },
     });
-    let day = parseInt((e.target as HTMLInputElement).value.split("-")[2]);
-    let coords: { lat: number; lon: number; date: string }[] = await resp.json();
-    options.color = getColor(day);
-    options.fillColor = getColor(day);
-    let box = {bX: Number.NEGATIVE_INFINITY , sX: Number.POSITIVE_INFINITY, bY: Number.NEGATIVE_INFINITY , sY: Number.POSITIVE_INFINITY};
-    for (const newCod of coords) {
-      box.bY = newCod.lat > box.bY ? newCod.lat: box.bY;
-      box.sY = newCod.lat < box.sY ? newCod.lat: box.sY;
-      box.bX = newCod.lon > box.bX ? newCod.lon: box.bX;
-      box.sX = newCod.lon < box.sX ? newCod.lon: box.sX;
-      L.circle([newCod.lat, newCod.lon], options).addTo(group);
-    }
-    my_map.fitBounds([[box.sY, box.sX],[box.bY, box.bX]]);
   });
-
 
   setInterval(() => {
     let now = DateTime.now().setZone("Asia/Tokyo");
@@ -112,7 +101,7 @@ function getColor(day: number): string {
   return colors[day % 12];
 }
 
-async function setFullMap(apikey: string, options: any, group: L.LayerGroup) {
+async function drawAllData(apikey: string, options: any, group: L.LayerGroup) {
   let resp = await fetch("/api/points", {
     headers: {
       APIKEY: apikey,
@@ -126,6 +115,35 @@ async function setFullMap(apikey: string, options: any, group: L.LayerGroup) {
     options.fillColor = getColor(dt.day);
     L.circle([newCod.lat, newCod.lon], options).addTo(group);
   }
+}
+
+async function drawDailyData(apikey: string, date: string, options: any, group: L.LayerGroup, map: L.Map) {
+  let resp = await fetch(`/api/points/${date}`, {
+    headers: {
+      APIKEY: apikey,
+    },
+  });
+  let day = parseInt(date.split("-")[2]);
+  let coords: { lat: number; lon: number; date: string }[] = await resp.json();
+  options.color = getColor(day);
+  options.fillColor = getColor(day);
+  let box = {
+    bX: Number.NEGATIVE_INFINITY,
+    sX: Number.POSITIVE_INFINITY,
+    bY: Number.NEGATIVE_INFINITY,
+    sY: Number.POSITIVE_INFINITY,
+  };
+  for (const newCod of coords) {
+    box.bY = newCod.lat > box.bY ? newCod.lat : box.bY;
+    box.sY = newCod.lat < box.sY ? newCod.lat : box.sY;
+    box.bX = newCod.lon > box.bX ? newCod.lon : box.bX;
+    box.sX = newCod.lon < box.sX ? newCod.lon : box.sX;
+    L.circle([newCod.lat, newCod.lon], options).addTo(group);
+  }
+  map.fitBounds([
+    [box.sY, box.sX],
+    [box.bY, box.bX],
+  ]);
 }
 
 document.querySelector<HTMLDivElement>("#api")?.addEventListener("submit", async () => {
