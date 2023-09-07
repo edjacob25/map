@@ -8,12 +8,10 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   if (apikey != ctx.env.APIKEY) {
     return new Response("", { status: 401 });
   }
-  let cols = ctx.env.LOC_DB.prepare("SELECT lat, lon, date FROM location WHERE date_jp LIKE ?").bind(
-    `${ctx.params.day}%`,
-  );
-  let data: D1Result<Record<string, string>> = await cols.all();
-  if (data.success) {
-    return Response.json(data.results);
+  let stmt = ctx.env.LOC_DB.prepare("SELECT lat, lon, date FROM location ORDER BY date_jp DESC LIMIT 1");
+  let data = await stmt.first();
+  if (data !== null) {
+    return Response.json(data);
   }
   return Response.json("");
 };
