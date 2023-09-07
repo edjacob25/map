@@ -29,11 +29,13 @@ async function setMap(apikey: string) {
     return;
   }
 
+  let now = DateTime.now().setZone("Asia/Tokyo");
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <h1>Where in the world is JB</h1>
     <button id="clear">Clear</button>
     <button id="all">All</button>
     <input id="date" type="date" value="2023-03-08" min="2023-03-09" max="2023-03-21" />
+    <h2>Time in Tokio: <span id="hour">${now.toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)}</span></h2>
     <div id="map"></div>
   `;
   let initial: [number, number] = [35.68000498064944, 139.7563632293441];
@@ -82,6 +84,14 @@ async function setMap(apikey: string) {
     }
     my_map.fitBounds([[box.sY, box.sX],[box.bY, box.bX]]);
   });
+
+
+  setInterval(() => {
+    let now = DateTime.now().setZone("Asia/Tokyo");
+    document.querySelector<HTMLSpanElement>("#hour")!.textContent = `${now.toLocaleString(
+      DateTime.DATETIME_MED_WITH_SECONDS,
+    )}`;
+  }, 1000);
 }
 
 function getColor(day: number): string {
