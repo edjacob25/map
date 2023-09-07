@@ -32,10 +32,19 @@ async function setMap(apikey: string) {
   let now = DateTime.now().setZone("Asia/Tokyo");
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <h1>Where in the world is JB</h1>
-    <button id="clear">Clear</button>
-    <button id="all">All</button>
-    <input id="date" type="date" value="2023-03-08" min="2023-03-09" max="2023-03-21" />
     <h2>Time in Tokio: <span id="hour">${now.toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)}</span></h2>
+    <div>
+      <h2>March</h2>
+      <button id="clear">Clear</button>
+      <button id="all">All</button>
+      <input id="date" type="date" value="2023-03-08" min="2023-03-09" max="2023-03-21" />
+    </div>
+    <div>
+      <h2>Fall</h2>
+      <button id="clear_2">Clear</button>
+      <button id="all_2">All</button>
+      <input id="date_2" type="date" value="2023-10-29" min="2023-10-29" max="2023-11-12" />
+    </div>
     <div id="map"></div>
   `;
   let initial: [number, number] = [35.68000498064944, 139.7563632293441];
@@ -54,7 +63,15 @@ async function setMap(apikey: string) {
     radius: 15,
   };
 
+  let start = DateTime.fromISO("2023-10-29T00:00:00.000+09:00");
+  let end = DateTime.fromISO("2023-11-13T00:00:00.000+09:00");
+
+  if (now.diff(start).as("seconds") > 0 && now.diff(end).as("seconds") < 0) {
+    await drawDailyData(apikey, now.toFormat("yyyy-MM-dd"), options, group, my_map);
+    document.querySelector<HTMLInputElement>("#date")!.value = now.toFormat("yyyy-MM-dd");
+  } else {
     await drawAllData(apikey, options, group);
+  }
 
   group.addTo(my_map);
 
