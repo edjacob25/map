@@ -7,5 +7,5 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   if (apikey != ctx.env.APIKEY) {
     return new Response("", { status: 401 });
   }
-  return new Response("", {status: 200});
+  return new Response("", { status: 200 });
 };
