@@ -221,5 +221,3 @@ document.querySelector<HTMLDivElement>("#api")?.addEventListener("submit", async
   let value = document.querySelector<HTMLInputElement>("#apiKey")?.value || "";
   await setMap(value);
 });
-
-setMap("magia");
