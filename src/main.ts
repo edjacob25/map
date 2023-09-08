@@ -68,26 +68,30 @@ async function setMap(apikey: string) {
   let end = DateTime.fromISO("2023-11-13T00:00:00.000+09:00");
 
   if (now.diff(start).as("seconds") > 0 && now.diff(end).as("seconds") < 0) {
+    document.querySelector<HTMLDivElement>("#fallTab")?.classList.add("selected");
+    document.querySelector<HTMLDivElement>("#marchControls")?.classList.add("invisible");
     await drawDailyData(apikey, now.toFormat("yyyy-MM-dd"), options, group, my_map);
     document.querySelector<HTMLInputElement>("#date")!.value = now.toFormat("yyyy-MM-dd");
   } else {
-    await drawAllData(apikey, options, group);
+    document.querySelector<HTMLDivElement>("#marchTab")?.classList.add("selected");
+    document.querySelector<HTMLDivElement>("#fallControls")?.classList.add("invisible");
+    await drawTripData("march", apikey, options, group, my_map);
   }
 
   group.addTo(my_map);
 
   document.querySelector<HTMLInputElement>("#all")?.addEventListener("click", async () => {
-    group.clearLayers();
-    await drawAllData(apikey, options, group);
+    await drawTripData("march", apikey, options, group, my_map);
+  });
+  document.querySelector<HTMLInputElement>("#all2")?.addEventListener("click", async () => {
+    await drawTripData("fall", apikey, options, group, my_map);
   });
   document.querySelector<HTMLInputElement>("#date")?.addEventListener("change", async (e: Event) => {
-    group.clearLayers();
     let date = (e.target as HTMLInputElement).value;
     await drawDailyData(apikey, date, options, group, my_map);
   });
 
   document.querySelector<HTMLInputElement>("#latest")?.addEventListener("click", async () => {
-    //group.clearLayers();
     let resp = await fetch("/api/points/latest", {
       headers: {
         APIKEY: apikey,
@@ -99,6 +103,38 @@ async function setMap(apikey: string) {
       .addTo(group)
       .bindPopup(`Seen at ${dt.toLocaleString(DateTime.DATETIME_SHORT)}`)
       .openPopup();
+  });
+
+  let marchTab = document.querySelector<HTMLDivElement>("#marchTab")!;
+  let fallTab = document.querySelector<HTMLDivElement>("#fallTab")!;
+
+  marchTab.addEventListener("click", async () => {
+    marchTab.classList.add("selected");
+    fallTab.classList.remove("selected");
+    let fallControls = document.querySelector<HTMLDivElement>("#fallControls");
+    if (!fallControls?.classList.contains("invisible")) {
+      fallControls?.classList.add("invisible");
+    }
+    let marchControls = document.querySelector<HTMLDivElement>("#marchControls");
+    if (marchControls?.classList.contains("invisible")) {
+      marchControls?.classList.remove("invisible");
+      await drawTripData("march", apikey, options, group, my_map);
+    }
+  });
+
+  fallTab.addEventListener("click", async () => {
+    marchTab.classList.remove("selected");
+    fallTab.classList.add("selected");
+    let marchControls = document.querySelector<HTMLDivElement>("#marchControls");
+    if (!marchControls?.classList.contains("invisible")) {
+      marchControls?.classList.add("invisible");
+    }
+
+    let fallControls = document.querySelector<HTMLDivElement>("#fallControls");
+    if (fallControls?.classList.contains("invisible")) {
+      fallControls?.classList.remove("invisible");
+      await drawTripData("fall", apikey, options, group, my_map);
+    }
   });
 
   setInterval(() => {
@@ -127,8 +163,10 @@ function getColor(day: number): string {
   return colors[day % 12];
 }
 
-async function drawAllData(apikey: string, options: any, group: L.LayerGroup) {
-  let resp = await fetch("/api/points", {
+async function drawTripData(tripName: string, apikey: string, options: any, group: L.LayerGroup, map: L.Map) {
+  group.clearLayers();
+  map.flyTo([35.68000498064944, 139.7563632293441], 10);
+  let resp = await fetch(`/api/points/trip?name=${tripName}`, {
     headers: {
       APIKEY: apikey,
     },
@@ -144,13 +182,14 @@ async function drawAllData(apikey: string, options: any, group: L.LayerGroup) {
 }
 
 async function drawDailyData(apikey: string, date: string, options: any, group: L.LayerGroup, map: L.Map) {
+  group.clearLayers();
   let resp = await fetch(`/api/points/${date}`, {
     headers: {
       APIKEY: apikey,
     },
   });
   let day = parseInt(date.split("-")[2]);
-  let coords: { lat: number; lon: number; date: string }[] = await resp.json();
+  const coords: { lat: number; lon: number; date: string }[] = await resp.json();
   options.color = getColor(day);
   options.fillColor = getColor(day);
   let box = {
@@ -165,6 +204,12 @@ async function drawDailyData(apikey: string, date: string, options: any, group: 
     box.bX = newCod.lon > box.bX ? newCod.lon : box.bX;
     box.sX = newCod.lon < box.sX ? newCod.lon : box.sX;
     L.circle([newCod.lat, newCod.lon], options).addTo(group);
+  }
+  if (coords.length < 1) {
+    let defaultLoc: [number, number] = [35.68000498064944, 139.7563632293441];
+    map.flyTo(defaultLoc, 10);
+    L.marker(defaultLoc).addTo(group).bindPopup(`No data today yet`).openPopup();
+    return;
   }
   map.fitBounds([
     [box.sY, box.sX],
