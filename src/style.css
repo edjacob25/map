@@ -64,3 +64,23 @@ h1 {
     height: 500px;
 }
 
+.cont {
+    display: flex;
+    justify-content: center;
+}
+
+.tab {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1rem;
+    flex: 1;
+}
+
+.invisible {
+    display: none;
+}
+
+.selected {
+    border: 2px #0078a8 solid;
+}

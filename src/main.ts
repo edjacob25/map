@@ -33,18 +33,18 @@ async function setMap(apikey: string) {
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <h1>Where in the world is JB</h1>
     <h2>Time in Tokio: <span id="hour">${now.toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)}</span></h2>
-    <div>
-      <h2>March</h2>
-      <button id="clear">Clear</button>
+    <div class="cont">
+      <h2 id="marchTab" class="tab">March</h2>
+      <h2 id="fallTab" class="tab">Fall</h2>
+    </div>
+    <div id="marchControls">
       <button id="all">All</button>
       <input id="date" type="date" value="2023-03-08" min="2023-03-09" max="2023-03-21" />
-      <button id="latest">Latest seen at:</button>
     </div>
-    <div>
-      <h2>Fall</h2>
-      <button id="clear_2">Clear</button>
+    <div id="fallControls">
       <button id="all_2">All</button>
       <input id="date_2" type="date" value="2023-10-29" min="2023-10-29" max="2023-11-12" />
+      <button id="latest">Latest seen at:</button>
     </div>
     <div id="map"></div>
   `;
@@ -76,7 +76,6 @@ async function setMap(apikey: string) {
 
   group.addTo(my_map);
 
-  document.querySelector<HTMLInputElement>("#clear")?.addEventListener("click", () => group.clearLayers());
   document.querySelector<HTMLInputElement>("#all")?.addEventListener("click", async () => {
     group.clearLayers();
     await drawAllData(apikey, options, group);
