@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import L, { layerGroup } from "leaflet";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-  <h1>Enter the api key</h1>
+  <h1>Enter the password</h1>
   <form id="api">
     <input id="apiKey" type="password" />
     <input id="apiSend" type="submit" value="Submit" />
@@ -31,7 +31,7 @@ async function setMap(apikey: string) {
 
   let now = DateTime.now().setZone("Asia/Tokyo");
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-    <h1>Where in the world is JB</h1>
+    <h1>Where in the world is Jacob</h1>
     <h2>Time in Tokio: <span id="hour">${now.toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)}</span></h2>
     <div class="cont">
       <h2 id="marchTab" class="tab">March</h2>
