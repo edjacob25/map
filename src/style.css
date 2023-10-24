@@ -104,3 +104,8 @@ input, button {
         border: 2px black solid;
     }
 }
+
+.greyscale {
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+}

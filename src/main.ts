@@ -38,6 +38,9 @@ async function setMap(apikey: string) {
       <h2 id="marchTab" class="tab">March</h2>
       <h2 id="fallTab" class="tab">Fall</h2>
     </div>
+    <div>
+      <button id="greyscale">Toggle Grayscale</button>
+    </div>
     <div id="marchControls">
       <button id="all">All</button>
       <input id="date" type="date" value="2023-03-08" min="2023-03-09" max="2023-03-21" />
@@ -46,6 +49,7 @@ async function setMap(apikey: string) {
       <button id="all_2">All</button>
       <input id="date_2" type="date" value="2023-10-29" min="2023-10-29" max="2023-11-12" />
       <button id="latest">Latest seen at:</button>
+      <button id="reload">Reload today</button>
     </div>
     <div id="map"></div>
   `;
@@ -104,6 +108,15 @@ async function setMap(apikey: string) {
       .addTo(group)
       .bindPopup(`Seen at ${dt.toLocaleString(DateTime.DATETIME_SHORT)}`)
       .openPopup();
+  });
+
+  document.querySelector<HTMLInputElement>("#greyscale")?.addEventListener("click", () => {
+    toggleGrayscale();
+  });
+
+  document.querySelector<HTMLInputElement>("#reload")?.addEventListener("click", async () => {
+    let dt =  DateTime.now().setZone("Asia/Tokyo").toISODate()!;
+    await drawDailyData(apikey, dt, options, group, my_map);
   });
 
   let marchTab = document.querySelector<HTMLDivElement>("#marchTab")!;
@@ -202,6 +215,13 @@ async function drawDailyData(apikey: string, date: string, options: any, group: 
     [box.sY, box.sX],
     [box.bY, box.bX],
   ]);
+}
+
+function toggleGrayscale(){
+  let tiles = document.getElementsByClassName("leaflet-tile-pane");
+  for (const tile of tiles) {
+    tile.classList.toggle("greyscale");
+  }
 }
 
 document.querySelector<HTMLDivElement>("#api")?.addEventListener("submit", async () => {
