@@ -2,6 +2,7 @@ import "./style.css";
 import "leaflet/dist/leaflet.css";
 import { DateTime } from "luxon";
 import L, { layerGroup } from "leaflet";
+import { getColor, getColorWithTime } from "./colors.ts";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <h1>Enter the password</h1>
@@ -145,24 +146,6 @@ async function setMap(apikey: string) {
   }, 1000);
 }
 
-function getColor(day: number): string {
-  let colors = [
-    "#ff0000",
-    "#00ffff",
-    "#80ff00",
-    "#8000ff",
-    "#ff8000",
-    "#ffff00",
-    "#00ff80",
-    "#0080ff",
-    "#ff00ff",
-    "#00ff00",
-    "#ff0080",
-    "#0000ff",
-  ];
-  return colors[day % 12];
-}
-
 async function drawTripData(tripName: string, apikey: string, options: any, group: L.LayerGroup, map: L.Map) {
   group.clearLayers();
   map.flyTo([35.68000498064944, 139.7563632293441], 10);
@@ -190,19 +173,23 @@ async function drawDailyData(apikey: string, date: string, options: any, group: 
   });
   let day = parseInt(date.split("-")[2]);
   const coords: { lat: number; lon: number; date: string }[] = await resp.json();
-  options.color = getColor(day);
-  options.fillColor = getColor(day);
   let box = {
     bX: Number.NEGATIVE_INFINITY,
     sX: Number.POSITIVE_INFINITY,
     bY: Number.NEGATIVE_INFINITY,
     sY: Number.POSITIVE_INFINITY,
   };
+
   for (const newCod of coords) {
     box.bY = newCod.lat > box.bY ? newCod.lat : box.bY;
     box.sY = newCod.lat < box.sY ? newCod.lat : box.sY;
     box.bX = newCod.lon > box.bX ? newCod.lon : box.bX;
     box.sX = newCod.lon < box.sX ? newCod.lon : box.sX;
+    let dt = DateTime.fromISO(newCod.date).setZone("Asia/Tokyo");
+
+    let tm = dt.hour * 60 + dt.minute;
+    options.color = getColorWithTime(day, tm);
+    options.fillColor = getColorWithTime(day, tm);
     L.circle([newCod.lat, newCod.lon], options).addTo(group);
   }
   if (coords.length < 1) {
