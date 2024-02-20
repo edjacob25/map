@@ -88,10 +88,14 @@ async function setMap(apikey: string) {
   document.querySelector<HTMLInputElement>("#all")?.addEventListener("click", async () => {
     await drawTripData("march", apikey, options, group, my_map);
   });
-  document.querySelector<HTMLInputElement>("#all2")?.addEventListener("click", async () => {
+  document.querySelector<HTMLInputElement>("#all_2")?.addEventListener("click", async () => {
     await drawTripData("fall", apikey, options, group, my_map);
   });
   document.querySelector<HTMLInputElement>("#date")?.addEventListener("change", async (e: Event) => {
+    let date = (e.target as HTMLInputElement).value;
+    await drawDailyData(apikey, date, options, group, my_map);
+  });
+  document.querySelector<HTMLInputElement>("#date_2")?.addEventListener("change", async (e: Event) => {
     let date = (e.target as HTMLInputElement).value;
     await drawDailyData(apikey, date, options, group, my_map);
   });
