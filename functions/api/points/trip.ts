@@ -10,14 +10,19 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   }
   const { searchParams } = new URL(ctx.request.url);
   let name = searchParams.get("name");
-  let cols: D1PreparedStatement;
-  if (name === "march") {
-    cols = ctx.env.LOC_DB.prepare("SELECT lat, lon, date FROM location WHERE date(date_jp) < date('2023-06-01')");
-  } else if (name == "fall") {
-    cols = ctx.env.LOC_DB.prepare("SELECT lat, lon, date FROM location WHERE date(date_jp) > date('2023-06-01')");
-  } else {
-    return new Response("", { status: 400 });
+  const trip: {
+    name: string;
+    start_date: string;
+    end_date: string;
+  } = await ctx.env.LOC_DB.prepare("SELECT * FROM trip WHERE name = ?").bind(name).first();
+
+  if (trip == null) {
+    return new Response("", { status: 404 });
   }
+
+  let cols = ctx.env.LOC_DB.prepare(
+    "SELECT lat, lon, date FROM location WHERE date(date_jp) > date(?) AND date(date_jp) < date(?)",
+  ).bind(trip.start_date, trip.end_date);
 
   let data = await cols.all();
   if (data.success) {
